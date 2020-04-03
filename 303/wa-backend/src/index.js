@@ -6,6 +6,20 @@ const app = express()  // instanciranje aplikacije
 const port = 3000  // port na kojem će web server slušati
 
 app.use(cors())
+app.use(express.json()) // automatski dekodiraj JSON poruke
+
+app.post('/posts', (req, res) => {
+    let data = req.body
+
+    // ovo inače radi baza (autoincrement ili sl.), ali čisto za primjer
+    data.id = 1 + storage.posts.reduce((max, el) => Math.max(el.id, max), 0)
+
+    // dodaj u našu bazu (lista u memoriji)
+    storage.posts.push(data)
+
+    // vrati ono što je spremljeno
+    res.json(data) // vrati podatke za referencu
+})
 
 app.get('/posts', (req, res) => {
     let posts = storage.posts
@@ -26,6 +40,9 @@ app.get('/posts', (req, res) => {
             return terms.every(term => info.indexOf(term) >= 0)
         })
     }
+
+    // sortiranje
+    posts.sort((a, b) => (b.postedAt - a.postedAt))
 
     res.json(posts)
 })
